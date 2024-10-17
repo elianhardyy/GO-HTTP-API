@@ -1,6 +1,8 @@
 package models
 
 import (
+	"html"
+	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -25,6 +27,15 @@ type User struct {
 // }
 
 func (u *User) BeforeSave(tx *gorm.DB) (err error) {
+	// trim
+	u.Name = strings.TrimSpace(u.Name)
+	u.Email = strings.TrimSpace(u.Email)
+	u.Password = strings.TrimSpace(u.Password)
+
+	// escape (&,>,<,"")
+	u.Name = html.EscapeString(u.Name)
+	u.Email = html.EscapeString(u.Email)
+	u.Password = html.EscapeString(u.Password)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err

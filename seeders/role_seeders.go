@@ -10,10 +10,10 @@ import (
 func SeedRoles(db *gorm.DB){
 	roles := []models.Role{
 		{Role_Name : "admin"},
-		{Role_Name:"user"},
+		{Role_Name : "user"},
 	}
-	for _, role := range roles {
-		db.FirstOrCreate(&roles, models.Role{Role_Name: role.Role_Name})
-	}
+	// for _, role := range roles {
+	// }
+	db.Create(&roles)
 	fmt.Println("seed roles to roles table")
 }
