@@ -8,6 +8,7 @@ import (
 	"server/services"
 	"server/utils"
 	"strconv"
+	"time"
 )
 
 type UserController struct {
@@ -61,6 +62,12 @@ func (c *UserController) Login(response http.ResponseWriter, request *http.Reque
 	token := &dto.TokenResponse{
 		AccessToken: tokenString,
 	}
+	http.SetCookie(response, &http.Cookie{
+		Name: "token",
+		Value: tokenString,
+		Expires: time.Now().Add(15 * time.Minute),
+		HttpOnly: true,
+	})
 	utils.JSONResponse(response,http.StatusAccepted,token)
 	//hashedpassword := bcrypt.CompareHashAndPassword()
 	//bcrypt.CompareHashAndPassword()
@@ -95,3 +102,12 @@ func (c *UserController) SingleUser(response http.ResponseWriter, request *http.
 // func googleAuth(response http.ResponseWriter, request http.Request){
 // 	session, _ = store
 // }
+func (c *UserController) Logout(response http.ResponseWriter, request *http.Request){
+	http.SetCookie(response, &http.Cookie{
+		Name: "token",
+		Value: "",
+		Expires: time.Now().Add(-1 * time.Hour),
+		HttpOnly: true,
+	})
+	utils.JSONResponse(response,http.StatusAccepted,"logout")
+}

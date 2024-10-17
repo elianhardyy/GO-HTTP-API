@@ -11,7 +11,6 @@ import (
 	"github.com/urfave/cli/v2"
 )
 func App(){
-	// config.DBConnection()
 	app := &cli.App{
 		Commands: []*cli.Command{
 			{
@@ -41,17 +40,17 @@ func App(){
 					return nil
 				},
 			},
-			{
-				Name: "server",
-				Usage: "Run the server",
-				Action: func(ctx *cli.Context) error {
-					server.Server()
-					return nil
-				},
-			},
 		},
 	}
-	if err := app.Run(os.Args);err != nil{
-		log.Fatal(err)
+	if len(os.Args) > 1 {
+		if err := app.Run(os.Args);err != nil{
+			log.Fatal(err)
+		}
+	}else{
+		_,err := config.DBConnection()
+		if err != nil{
+			log.Fatal("failed")
+		}
+		server.Server()
 	}
 }

@@ -13,6 +13,15 @@ func ProtectedHandler(next http.Handler) http.Handler{
 			utils.ErrorResponse(w,http.StatusUnauthorized,"Missing Authorization Header")
 			return
 		}
+		_, err := r.Cookie("token")
+		if err != nil{
+			if err == http.ErrNoCookie{
+				utils.ErrorResponse(w,http.StatusUnauthorized,"unauthorized about cookie")
+				return
+			}
+			utils.ErrorResponse(w,http.StatusBadRequest,"bad")
+			return
+		}
 		tokenString := authHeader[len("Bearer "):]
 		//misal := authHeader[len("Bearer "):]
 		fmt.Println(tokenString);

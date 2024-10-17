@@ -13,4 +13,5 @@ func UserRoutes(api controllers.UserController) {
 	R.HandleFunc("/login",api.Login).Methods("POST")
 	R.Handle("/userme",middlewares.ProtectedHandler(http.HandlerFunc(api.UserMe))).Methods("GET")
 	R.Handle("/user",middlewares.ProtectedHandler(http.HandlerFunc(api.SingleUser))).Methods("GET")
+	R.Handle("/logout",middlewares.ProtectedHandler(http.HandlerFunc(api.Logout))).Methods("POST")
 }
