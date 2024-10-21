@@ -12,6 +12,5 @@ func InitUserApiGen(db *gorm.DB) controllers.UserController{
 	userRepository := repositories.NewUserRepository(db)
 	userService := services.NewUserService(userRepository)
 	userController := controllers.NewUserController(userService)
-	//http.HandlerFunc("/",userController.Register)
 	return userController
 }

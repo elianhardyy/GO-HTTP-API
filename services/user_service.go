@@ -7,25 +7,24 @@ import (
 	"server/repositories"
 )
 
-// type UserResponse struct {
-// 	Name, Email string
-// }
-// type UserRepositoryContract interface{
-// 	SaveOrUpdate(dto dto.UserDto) (dto.UserDto, error)
-// 	FindAll()[]dto.UserDto
-// }
+type UserService interface{
+	SaveOrUpdate(dto dto.UserDto)(dto.UserDto,error)
+	FindByEmail(email string, password string) (dto.UserLoginDto,error)
+	EmailAuth(email string) string
+	FindById(id uint) models.User
+}
 
-type UserService struct {
+type userService struct {
 	UserRepository repositories.UserRepository
 }
 
 func NewUserService(u repositories.UserRepository) UserService{
-	return UserService{
+	return &userService{
 		UserRepository:u,
 	}
 }
 //implementation
-func(u *UserService) SaveOrUpdate(dto dto.UserDto)(dto.UserDto,error){
+func(u *userService) SaveOrUpdate(dto dto.UserDto)(dto.UserDto,error){
 	userMapper := mapper.ToUserModel(dto)
 	user, err := u.UserRepository.SaveOrUpdate(userMapper)
 	if err != nil{
@@ -33,7 +32,7 @@ func(u *UserService) SaveOrUpdate(dto dto.UserDto)(dto.UserDto,error){
 	}
 	return mapper.ToUserDto(user), nil
 }
-func (u *UserService) FindByEmail(email string, password string) (dto.UserLoginDto,error){
+func (u *userService) FindByEmail(email string, password string) (dto.UserLoginDto,error){
 	emails,err := u.UserRepository.FindByEmail(email,password)
 	if err != nil{
 		return dto.UserLoginDto{
@@ -47,12 +46,12 @@ func (u *UserService) FindByEmail(email string, password string) (dto.UserLoginD
 	},nil
 }
 
-func (u *UserService) EmailAuth(email string) string{
+func (u *userService) EmailAuth(email string) string{
 	emails := u.UserRepository.SingleEmail(email)
 	return emails
 }
 
-func (u *UserService) FindById(id uint) models.User{
+func (u *userService) FindById(id uint) models.User{
 	user := u.UserRepository.FindById(id)
 	return user
 }

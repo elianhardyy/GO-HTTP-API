@@ -23,9 +23,6 @@ func NewUserController(s services.UserService) UserController{
 func (c *UserController) Register(response http.ResponseWriter, request *http.Request){
 	var newUserDto dto.UserDto
 	request.ParseForm()
-	//newUserDto.Name = request.Form.Get("name")
-	//newUserDto.Email = request.Form.Get("email")
-	//newUserDto.Password = request.Form.Get("password")
 	if err := json.NewDecoder(request.Body).Decode(&newUserDto); err != nil{
 		utils.ErrorResponse(response,http.StatusInternalServerError,"error")
 		return
@@ -49,8 +46,6 @@ func (c *UserController) Login(response http.ResponseWriter, request *http.Reque
 		utils.ErrorResponse(response,http.StatusInternalServerError,"error credentials")
 		return
 	}
-	fmt.Println("will generate")
-	//findId = c.UserService.FindById()
 	tokenString, err := utils.GenerateToken(loginUser.Email)
 	fmt.Println("generated")
 	if err != nil{
@@ -58,7 +53,6 @@ func (c *UserController) Login(response http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	//utils.JSONResponse(response,http.StatusCreated,usr)
 	token := &dto.TokenResponse{
 		AccessToken: tokenString,
 	}
@@ -69,21 +63,9 @@ func (c *UserController) Login(response http.ResponseWriter, request *http.Reque
 		HttpOnly: true,
 	})
 	utils.JSONResponse(response,http.StatusAccepted,token)
-	//hashedpassword := bcrypt.CompareHashAndPassword()
-	//bcrypt.CompareHashAndPassword()
 }
 func (c *UserController) UserMe(response http.ResponseWriter, request *http.Request){
-	//var udto dto.UserLoginDto
-	//response.Header().Set("Content-Type","application/json")
-
-	//request.
-	//user, ok := request.Context().Value(&loginUser).(dto.UserLoginDto)
-	//fmt.Println("gagal disini")
 	email := response.Header().Get("email")
-	// if !ok {
-	// 	utils.ErrorResponse(response,http.StatusBadRequest,"error dashboard")
-	// 	return
-	// }
 	findEmail := c.UserService.EmailAuth(email)
 	fmt.Println("success dashboard")
 	utils.JSONResponse(response,http.StatusFound,findEmail)
@@ -99,9 +81,6 @@ func (c *UserController) SingleUser(response http.ResponseWriter, request *http.
 	utils.JSONResponse(response, http.StatusFound,user)
 }
 
-// func googleAuth(response http.ResponseWriter, request http.Request){
-// 	session, _ = store
-// }
 func (c *UserController) Logout(response http.ResponseWriter, request *http.Request){
 	http.SetCookie(response, &http.Cookie{
 		Name: "token",

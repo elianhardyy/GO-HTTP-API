@@ -1,10 +1,11 @@
 package cli
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"server/config"
-	"server/models"
+	"server/migration"
 	"server/seeders"
 	"server/server"
 
@@ -21,10 +22,8 @@ func App(){
 					if err != nil{
 						log.Fatal("failed")
 					}
-					db.AutoMigrate(&models.Role{})
-					db.AutoMigrate(&models.User{})
-					db.AutoMigrate(&models.Category{})
-					db.AutoMigrate(&models.Product{})
+					migration.Migration(db)
+					fmt.Println("success migrate")
 					return nil
 				},
 			},
@@ -37,6 +36,7 @@ func App(){
 						log.Fatal("failed")
 					}
 					seeders.Seeder(db)
+					fmt.Println("success seed")
 					return nil
 				},
 			},

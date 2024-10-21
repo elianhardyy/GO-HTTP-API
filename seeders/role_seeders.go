@@ -1,7 +1,6 @@
 package seeders
 
 import (
-	"fmt"
 	"server/models"
 
 	"gorm.io/gorm"
@@ -12,8 +11,5 @@ func SeedRoles(db *gorm.DB){
 		{Role_Name : "admin"},
 		{Role_Name : "user"},
 	}
-	// for _, role := range roles {
-	// }
 	db.Create(&roles)
-	fmt.Println("seed roles to roles table")
 }

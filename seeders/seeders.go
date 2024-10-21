@@ -3,6 +3,6 @@ package seeders
 import "gorm.io/gorm"
 
 func Seeder(db *gorm.DB){
-	SeedRoles(db)
+	SeedUsers(db)
 	SeedCategories(db)
 }
