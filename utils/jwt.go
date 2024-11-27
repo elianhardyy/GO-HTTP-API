@@ -2,19 +2,25 @@ package utils
 
 import (
 	"fmt"
+	"os"
+	"server/dto"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
 type Claims struct{
+	ID   uint  `json:"id"`
+	Name string	 `json:"name"`
 	Email string `json:"email"`
 	jwt.RegisteredClaims
 }
-func GenerateToken(s string) (string, error) {
-	secretKey := []byte("hellodek")
+func GenerateToken(user dto.UserResponse) (string, error) {
+	secretKey := []byte(os.Getenv("JWT_SECRET"))
 	claims := &Claims{
-		Email: s,
+		ID: user.ID,
+		Name: user.Name,
+		Email: user.Email,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
 		},

@@ -1,6 +1,8 @@
 package models
 
 import (
+	"crypto/rand"
+	"math/big"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -8,52 +10,50 @@ import (
 )
 
 type User struct {
-	ID        uint    `gorm:"primaryKey" json:"id"`
-	Name      string    
-	Email     string  `gorm:"unique"`  
-	Password  string    
-	Roles 	  []Role  `gorm:"many2many:user_roles;foreignKey:id;joinForeignKey:user_id;References:id;joinReferences:role_id"`
-	CreatedAt time.Time // Automatically managed by GORM for creation time
-	UpdatedAt time.Time
+	ID        			uint    `gorm:"primaryKey"`
+	Name      			string    	`gorm:"type:varchar(255);not null"`
+	Email     			string  	`gorm:"unique"`  
+	Password  			string    	`gorm:"not null"`
+	Pin		  			string
+	Profile   			string	
+	Token				[]Token
+	CreatedAt 			time.Time // Automatically managed by GORM for creation time
+	UpdatedAt 			time.Time
 }
 
-// type UserRole struct{
-// 	UserID  int `gorm:"foreignKey:id;References:id;index"`
-//   	RoleID int `gorm:"foreignKey:id;References:id;index"`
-//   	CreatedAt time.Time
-//   	DeletedAt gorm.DeletedAt
-// }
+type Token struct {
+	gorm.Model
+	TokenString		string		`gorm:"unique:not null"`
+	ExpiredAt		time.Time	`gorm:"not null"`
+	IsUsed			bool		`gorm:"default:false"`
+	UserID			uint
+	User			User
+}
 
 func (u *User) BeforeSave(tx *gorm.DB) (err error) {
-	// trim
-	// u.Name = strings.TrimSpace(u.Name)
-	// u.Email = strings.TrimSpace(u.Email)
-	// u.Password = strings.TrimSpace(u.Password)
-
-	// // escape (&,>,<,"")
-	// u.Name = html.EscapeString(u.Name)
-	// u.Email = html.EscapeString(u.Email)
-	// u.Password = html.EscapeString(u.Password)
+	characters := "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, 8)
+	for i := range b {
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(characters))))
+		if err != nil {
+			return err
+		}
+		b[i] = characters[num.Int64()]
+	}
+	u.Pin = string(b)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
-	//var role Role
-	u.Roles = []Role{
-		{ID:2 },
-	}
+	
 	u.Password = string(hashedPassword)
 	return nil
 }
 
-// func (ur *UserRole) BeforeSave(tx *gorm.DB) error {
-// 	var u *User
-// 	user := &UserRole{
-// 		UserID: int(u.Id),
-// 		RoleID: 2,
-// 	}
-// 	if err := tx.Create(user).Error; err != nil{
-// 		return err
-// 	}
-// 	return nil
-// }
+func (t *Token) BeforeSave(tx *gorm.DB) (err error) {
+	
+	expiryTime := time.Now().Add(24 * time.Hour)
+	//t.TokenString = genToken
+	t.ExpiredAt = expiryTime
+	return nil
+}

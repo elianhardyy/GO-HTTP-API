@@ -8,7 +8,7 @@ import (
 var DB *gorm.DB
 
 func DBConnection()(*gorm.DB,error) {
-	db,err := gorm.Open(mysql.Open("root:@tcp(127.0.0.1:3306)/go_crud"),&gorm.Config{})
+	db,err := gorm.Open(mysql.Open("root:@tcp(127.0.0.1:3306)/gochatapp?parseTime=true"),&gorm.Config{})
 	if err != nil {
 		//panic("could not connect to the database")
 		return DB,err

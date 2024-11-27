@@ -9,9 +9,11 @@ import (
 
 type UserService interface{
 	SaveOrUpdate(dto dto.UserDto)(dto.UserDto,error)
-	FindByEmail(email string, password string) (dto.UserLoginDto,error)
-	EmailAuth(email string) string
+	FindByEmail(email string, password string) (dto.UserResponse,error)
+	EmailAuth(email string) (dto.UserResponse,error)
 	FindById(id uint) models.User
+	VerifyTokenS(token string)error
+	UpdateProfile(user dto.ProfileDto, id uint)(dto.ProfileDto,error)
 }
 
 type userService struct {
@@ -32,28 +34,54 @@ func(u *userService) SaveOrUpdate(dto dto.UserDto)(dto.UserDto,error){
 	}
 	return mapper.ToUserDto(user), nil
 }
-func (u *userService) FindByEmail(email string, password string) (dto.UserLoginDto,error){
-	emails,err := u.UserRepository.FindByEmail(email,password)
+func (u *userService) FindByEmail(email string, password string) (dto.UserResponse,error){
+	users,err := u.UserRepository.FindByEmail(email,password)
 	if err != nil{
-		return dto.UserLoginDto{
-			Email: emails,
-			Password: "",
-		},err
+		return dto.UserResponse{},err
 	}
-	return dto.UserLoginDto{
-		Email: emails,
-		Password: "",
+	err = u.UserRepository.TokenIsUsed(email)
+	if err != nil {
+		return dto.UserResponse{},err
+	}
+	return dto.UserResponse{
+		ID: users.ID,
+		Name: users.Name,
+		Email: users.Email,
 	},nil
 }
 
-func (u *userService) EmailAuth(email string) string{
-	emails := u.UserRepository.SingleEmail(email)
-	return emails
+func (u *userService) EmailAuth(email string) (dto.UserResponse,error){
+	user,err := u.UserRepository.SingleEmail(email)
+	if err != nil {
+		return dto.UserResponse{},err
+	}
+	return dto.UserResponse{
+		Name: user.Name,
+		Email: user.Email,
+	},nil
 }
 
 func (u *userService) FindById(id uint) models.User{
 	user := u.UserRepository.FindById(id)
 	return user
+}
+
+func (u *userService) VerifyTokenS(token string)error{
+	err := u.UserRepository.VerifyToken(token)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u *userService) UpdateProfile(user dto.ProfileDto, id uint)(dto.ProfileDto,error) {
+	profileMapper := mapper.ToUserProfileModel(user)
+
+	users,err := u.UserRepository.UpdateProfile(profileMapper,id)
+	if err != nil {
+		return dto.ProfileDto{},err
+	}
+	return mapper.ToUserProfileDto(users),nil
 }
 // func (u *UserService) FindAll()[]dto.UserDto{
 

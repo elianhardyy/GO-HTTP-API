@@ -3,6 +3,7 @@ package middlewares
 import (
 	"fmt"
 	"net/http"
+	"server/dto"
 	"server/utils"
 )
 
@@ -34,7 +35,10 @@ func ProtectedHandler(next http.Handler) http.Handler{
 		// 	return
 		// }
 		r.Header.Set("email",claims.Email)
-		utils.JSONResponse(w,http.StatusContinue,claims.Email)
+		utils.JSONResponse(w,http.StatusContinue,dto.UserResponse{
+			Name: claims.Name,
+			Email: claims.Email,
+		})
 		next.ServeHTTP(w,r)
 	})
 }

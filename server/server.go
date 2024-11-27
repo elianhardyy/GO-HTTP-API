@@ -15,6 +15,21 @@ import (
 	"github.com/markbates/goth/providers/google"
 )
 
+func corsMiddleware(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        w.Header().Set("Access-Control-Allow-Origin", "*") // Replace * with specific origin in production
+        w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+        w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        if r.Method == http.MethodOptions {
+            w.WriteHeader(http.StatusNoContent)
+            return
+        }
+
+        next.ServeHTTP(w, r)
+    })
+}
+
+
 func Server(){
     err := godotenv.Load()
 	if err != nil{
@@ -52,9 +67,11 @@ func Server(){
 	routes.R.HandleFunc("/auth/{provider}", func(res http.ResponseWriter, req *http.Request) {
 		gothic.BeginAuthHandler(res, req)
 	}).Methods("GET")
-	
+	staticDir := "/assets/"
+	routes.R.PathPrefix(staticDir).Handler(http.StripPrefix(staticDir,http.FileServer(http.Dir("."+staticDir))))
 	
 	routes.InitRoute()
+	handler := corsMiddleware(routes.R)
 	log.Println("http://localhost:7000")
-	log.Fatal(http.ListenAndServe(":7000",routes.R))
+	log.Fatal(http.ListenAndServe(":7000",handler))
 }

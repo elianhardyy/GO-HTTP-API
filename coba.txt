@@ -1,0 +1,11 @@
+filename := path.Join("./assets",header.Filename)
+	dest, err := os.Create(filename)
+	if err != nil {
+		return
+	}
+	defer dest.Close()
+
+	_, err = io.Copy(dest,file)
+	if err != nil {
+		return
+	}

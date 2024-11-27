@@ -52,7 +52,7 @@ func (c *categoryRepository) UpdateCategory(categoryDto struct{
 	Name string
 },id uint) (models.Category, error) {
 	var category models.Category
-	err := c.DB.Where("id = ?",id).Updates(models.Category{
+	err := c.DB.Where("id = ?",id).Updates(&models.Category{
 		Name: categoryDto.Name,
 	}).Error
 	if err != nil{
